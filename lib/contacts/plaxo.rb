@@ -1,56 +1,57 @@
 require 'rexml/document'
 
-class Contacts
-  class Plaxo < Base
-    URL                 = "http://www.plaxo.com/"
-    LOGIN_URL           = "https://www.plaxo.com/signin"
-    ADDRESS_BOOK_URL    = "http://www.plaxo.com/po3/?module=ab&operation=viewFull&mode=normal"
-    CONTACT_LIST_URL    = "http://www.plaxo.com/axis/soap/contact?_action=getContacts&_format=xml"
-    PROTOCOL_ERROR      = "Plaxo has changed its protocols, please upgrade this library first. If that does not work, dive into the code and submit a patch at http://github.com/cardmagic/contacts"
+module MOG
+  class Contacts
+    class Plaxo < Base
+      URL                 = "http://www.plaxo.com/"
+      LOGIN_URL           = "https://www.plaxo.com/signin"
+      ADDRESS_BOOK_URL    = "http://www.plaxo.com/po3/?module=ab&operation=viewFull&mode=normal"
+      CONTACT_LIST_URL    = "http://www.plaxo.com/axis/soap/contact?_action=getContacts&_format=xml"
+      PROTOCOL_ERROR      = "Plaxo has changed its protocols, please upgrade this library first. If that does not work, dive into the code and submit a patch at http://github.com/cardmagic/contacts"
     
-    def real_connect
+      def real_connect
       
-    end # real_connect
+      end # real_connect
     
-    def contacts
-      getdata = "&authInfo.authByEmail.email=%s" % CGI.escape(login)
-      getdata += "&authInfo.authByEmail.password=%s" % CGI.escape(password)
-      data, resp, cookies, forward = get(CONTACT_LIST_URL + getdata)
+      def contacts
+        getdata = "&authInfo.authByEmail.email=%s" % CGI.escape(login)
+        getdata += "&authInfo.authByEmail.password=%s" % CGI.escape(password)
+        data, resp, cookies, forward = get(CONTACT_LIST_URL + getdata)
       
-      if resp.code_type != Net::HTTPOK
-        raise ConnectionError, PROTOCOL_ERROR
-      end
+        if resp.code_type != Net::HTTPOK
+          raise ConnectionError, PROTOCOL_ERROR
+        end
       
-      parse data
-    end # contacts
+        parse data
+      end # contacts
     
-  private
-    def parse(data, options={})
-      doc = REXML::Document.new(data)
-      code = doc.elements['//response/code'].text
+    private
+      def parse(data, options={})
+        doc = REXML::Document.new(data)
+        code = doc.elements['//response/code'].text
       
-      if code == '401'
-        raise AuthenticationError, "Username and password do not match"
-      elsif code == '200'
-        @contacts = []
-        doc.elements.each('//contact') do |cont|
-          name  = cont.elements['fullName'].text   #rescue nil
-          email = cont.elements['email1'].text #rescue nil
-          @contacts << [name, email]
-        end.compact
-        @contacts
-      else
-        raise ConnectionError, PROTOCOL_ERROR
-      end
+        if code == '401'
+          raise AuthenticationError, "Username and password do not match"
+        elsif code == '200'
+          @contacts = []
+          doc.elements.each('//contact') do |cont|
+            name  = cont.elements['fullName'].text   #rescue nil
+            email = cont.elements['email1'].text #rescue nil
+            @contacts << [name, email]
+          end.compact
+          @contacts
+        else
+          raise ConnectionError, PROTOCOL_ERROR
+        end
       
-    end # parse
+      end # parse
 
-  end # Plaxo
+    end # Plaxo
   
-  TYPES[:plaxo] = Plaxo
+    TYPES[:plaxo] = Plaxo
   
-end # Contacts
-
+  end # Contacts
+end
 
 # sample contacts responses
 '
