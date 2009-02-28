@@ -6,7 +6,7 @@ require 'rake/gempackagetask'
 require 'rake/contrib/rubyforgepublisher'
 require 'lib/contacts'
 
-PKG_VERSION = Contacts::VERSION
+PKG_VERSION = MOG::Contacts::VERSION
 
 PKG_FILES = FileList[
     "lib/**/*", "bin/*", "test/**/*", "[A-Z]*", "Rakefile", "doc/**/*", "examples/**/*"
